@@ -61,7 +61,7 @@ extern volatile uint32_t g_TickCnt;
         trace_printf("end %s @%d %d\n", __func__, LOG_GET_TIME(), (int)status)
 
 #define LOG_FUNCTION_END_FMT(status, fmt, ... )\
-        trace_printf("End %s @%d %d\t"fmt"\n" , __func__, LOG_GET_TIME(), (int)status, ##__VA_ARGS__)
+        trace_printf("End %s @%d %d\t" fmt "\n" , __func__, LOG_GET_TIME(), (int)status, ##__VA_ARGS__)
 
 #define VL6180x_ErrLog(msg, ... )\
     do{\
@@ -73,7 +73,7 @@ extern volatile uint32_t g_TickCnt;
   #define LOG_FUNCTION_START(...) (void)0
   #define LOG_FUNCTION_END(...) (void)0
   #define LOG_FUNCTION_END_FMT(...) (void)0
-  #define VL6180x_ErrLog(... ) //OnErrLog() //(void)0
+  #define VL6180x_ErrLog(... ) (void)0//OnErrLog() //(void)0
 #endif
 
   

@@ -1098,7 +1098,7 @@ int VL6180X::VL6180x_RangeSetThresholds(VL6180xDev_t dev, uint16_t low, uint16_t
 	int scale;
 	LOG_FUNCTION_START("%d %d", (int) low, (int)high);
 	scale = _GetUpscale(dev, UpscaleFactor);
-	if (low > scale * 255 || high > scale * 255) {
+	if ((int)low > scale * 255 || (int)high > scale * 255) {
 		status = INVALID_PARAMS;
 	} else {
 		do {
@@ -1803,7 +1803,7 @@ done:
 
 int VL6180X::VL6180x_RangeIgnoreSetEnable(VL6180xDev_t dev, int EnableState){
 	int CurEnable;
-	int status;
+	int status = 0;
 	LOG_FUNCTION_START("enable %d", EnableState);
 
 	if( EnableState )
@@ -2617,7 +2617,7 @@ int VL6180X::VL6180x_DMaxGetState(VL6180xDev_t dev){
  */
 uint32_t VL6180x_SqrtUint32(uint32_t num) {
     uint32_t res = 0;
-	uint32_t bit = 1 << 30; /* The second-to-top bit is set: 1 << 30 for 32 bits */
+	uint32_t bit = (uint32_t)1 << 30; /* The second-to-top bit is set: 1 << 30 for 32 bits */
 
 	/* "bit" starts at the highest power of four <= the argument. */
 	while (bit > num)
@@ -2655,7 +2655,7 @@ uint32_t _DMax_RawValueAtRateKCps(VL6180xDev_t dev, int32_t rate){
 	retSignalAt400mm        = _DMaxData(retSignalAt400mm);
 	/* 12 to 18 bits Kcps */
 	if (rate > 0) {
-		DMaxSq = 400 * 400 * 1000 / rate - (400 * 400 / 330);
+		DMaxSq = (int32_t)400 * (int32_t)400 * (int32_t)1000 / rate - ((int32_t)400 * (int32_t)400 / (int32_t)330);
 		/* K of (1/RtnAmb -1/330 )=> 30bit- (12-18)bit  => 12-18 bits*/
 		if (DMaxSq <= 0) {
 		    RawDMax = 0;
@@ -2787,7 +2787,7 @@ int _DMax_Compute(VL6180xDev_t dev, VL6180x_RangeData_t *pRange){
 	int32_t DMax;
 	int scaling;
 	uint16_t HwLimitAtScale;
-	static const int ROMABLE_DATA rtnAmbLowLimit_KCps = 330 * 1000;
+	static const uint32_t ROMABLE_DATA rtnAmbLowLimit_KCps = (uint32_t)330 * (uint32_t)1000;
 
 	rtnAmbRate = pRange->rtnAmbRate;
 	if (rtnAmbRate  < rtnAmbLowLimit_KCps) {
@@ -2824,6 +2824,8 @@ int _DMax_Compute(VL6180xDev_t dev, VL6180x_RangeData_t *pRange){
 int VL6180X::VL6180x_WrByte(VL6180xDev_t dev, uint16_t index, uint8_t data)
 {
    int  status;
+   
+   (void)dev;
  
    status=VL6180x_I2CWrite(Device->I2cAddr, index, &data,(uint8_t)1);
    return status;
@@ -2833,6 +2835,8 @@ int VL6180X::VL6180x_WrWord(VL6180xDev_t dev, uint16_t index, uint16_t data)
 {
    int  status;
    
+   (void)dev;
+   
    status=VL6180x_I2CWrite(Device->I2cAddr, index, (uint8_t *)&data,(uint8_t)2);
    return status;
 }
@@ -2841,6 +2845,8 @@ int VL6180X::VL6180x_WrDWord(VL6180xDev_t dev, uint16_t index, uint32_t data)
 {
    int  status;
    
+   (void)dev;
+   
    status=VL6180x_I2CWrite(Device->I2cAddr, index, (uint8_t *)&data,(uint8_t)4);
    return status;
 }
@@ -2848,6 +2854,8 @@ int VL6180X::VL6180x_WrDWord(VL6180xDev_t dev, uint16_t index, uint32_t data)
 int VL6180X::VL6180x_RdByte(VL6180xDev_t dev, uint16_t index, uint8_t *data)
 {
    int  status;
+   
+   (void)dev;
     
    uint8_t buffer;
    status=VL6180x_I2CRead(Device->I2cAddr, index, &buffer,1);
@@ -2861,6 +2869,8 @@ int VL6180X::VL6180x_RdByte(VL6180xDev_t dev, uint16_t index, uint8_t *data)
 int VL6180X::VL6180x_RdWord(VL6180xDev_t dev, uint16_t index, uint16_t *data)
 {
    int  status;
+   
+   (void)dev;
     
    uint8_t buffer[2];
    status=VL6180x_I2CRead(Device->I2cAddr, index, buffer, 2);
@@ -2875,6 +2885,8 @@ int VL6180X::VL6180x_RdDWord(VL6180xDev_t dev, uint16_t index, uint32_t *data)
 {
    int status;
    uint8_t buffer[4];
+   
+   (void)dev;
    status=VL6180x_I2CRead(Device->I2cAddr, index, buffer,4);
    if(!status)
    {
@@ -2887,8 +2899,10 @@ int VL6180X::VL6180x_UpdateByte(VL6180xDev_t dev, uint16_t index, uint8_t AndDat
 {
    int  status;
    uint8_t buffer;
+   
+   (void)dev;
  
-   status=VL6180x_I2CWrite(Device->I2cAddr, index, (uint8_t *)buffer,(uint8_t)0);
+   status=VL6180x_I2CWrite(Device->I2cAddr, index, &buffer,(uint8_t)0);
    if(!status)
    {
       /* read data direct onto buffer */
@@ -2904,7 +2918,7 @@ int VL6180X::VL6180x_UpdateByte(VL6180xDev_t dev, uint16_t index, uint8_t AndDat
  
 int VL6180X::VL6180x_I2CWrite(uint8_t DeviceAddr, uint16_t RegisterAddr, uint8_t* pBuffer, uint16_t NumByteToWrite)
 {
-  int i;
+  uint16_t i;
   uint8_t tmp[32];
   uint16_t myRegisterAddr = RegisterAddr;
   uint16_t WriteDeviceAddr=DeviceAddr*2;
@@ -2929,7 +2943,7 @@ int VL6180X::VL6180x_I2CWrite(uint8_t DeviceAddr, uint16_t RegisterAddr, uint8_t
   
   dev_i2c->beginTransmission(((uint8_t)(((WriteDeviceAddr) >> 1) & 0x7F)));
 
-  for (int i = 0 ; i < (NumByteToWrite + sizeof(RegisterAddr)); i++)
+  for (uint16_t i = 0 ; i < (NumByteToWrite + sizeof(RegisterAddr)); i++)
     dev_i2c->write(tmp[i]);
   
   dev_i2c->endTransmission(true);
@@ -2939,10 +2953,9 @@ int VL6180X::VL6180x_I2CWrite(uint8_t DeviceAddr, uint16_t RegisterAddr, uint8_t
  
 int VL6180X::VL6180x_I2CRead(uint8_t DeviceAddr, uint16_t RegisterAddr, uint8_t* pBuffer, uint16_t NumByteToRead)
 {
-  int i;
+  uint16_t i;
   uint8_t tmp[32]; 
   uint16_t myRegisterAddr = RegisterAddr;
-  uint16_t myRegisterAddrBE;
   uint16_t ReadDeviceAddr=DeviceAddr*2;
 
   /* then prepare 16 bits register address in BE format. Then, send data and STOP condition */
@@ -3073,6 +3086,7 @@ int VL6180X::InitSensor(uint8_t NewAddr)
 int VL6180X::StartMeasurement(OperatingMode operating_mode, void (*fptr)(void), uint16_t low, uint16_t high)
 {
    int status, r_status, l_status;
+   (void)fptr;
     
    switch(operating_mode)
    {
@@ -3123,8 +3137,8 @@ int VL6180X::StartMeasurement(OperatingMode operating_mode, void (*fptr)(void), 
            return (r_status|l_status);
        
       case(range_continuous_polling_high_threshold):
-        status=VL6180x_RangeConfigInterrupt(Device, CONFIG_GPIO_INTERRUPT_LEVEL_HIGH);
-        status=VL6180x_AlsConfigInterrupt(Device, CONFIG_GPIO_INTERRUPT_DISABLED);
+        r_status=VL6180x_RangeConfigInterrupt(Device, CONFIG_GPIO_INTERRUPT_LEVEL_HIGH);
+        l_status=VL6180x_AlsConfigInterrupt(Device, CONFIG_GPIO_INTERRUPT_DISABLED);
         if((!r_status)&&(!l_status))
         {
            status=RangeSetHighThreshold(high);
@@ -3137,8 +3151,8 @@ int VL6180X::StartMeasurement(OperatingMode operating_mode, void (*fptr)(void), 
            return (r_status|l_status);
                 
       case(range_continuous_polling_out_of_window):
-        status=VL6180x_RangeConfigInterrupt(Device, CONFIG_GPIO_INTERRUPT_OUT_OF_WINDOW);
-        status=VL6180x_AlsConfigInterrupt(Device, CONFIG_GPIO_INTERRUPT_DISABLED);
+        r_status=VL6180x_RangeConfigInterrupt(Device, CONFIG_GPIO_INTERRUPT_OUT_OF_WINDOW);
+        l_status=VL6180x_AlsConfigInterrupt(Device, CONFIG_GPIO_INTERRUPT_DISABLED);
         if((!r_status)&&(!l_status))
         {
            status=VL6180x_RangeSetThresholds(Device,low,high,1);
@@ -3151,8 +3165,8 @@ int VL6180X::StartMeasurement(OperatingMode operating_mode, void (*fptr)(void), 
            return (r_status|l_status);
                 
       case(als_continuous_polling_low_threshold):
-        status=VL6180x_AlsConfigInterrupt(Device, CONFIG_GPIO_INTERRUPT_LEVEL_LOW);
-        status=VL6180x_RangeConfigInterrupt(Device, CONFIG_GPIO_INTERRUPT_DISABLED);
+        r_status=VL6180x_AlsConfigInterrupt(Device, CONFIG_GPIO_INTERRUPT_LEVEL_LOW);
+        l_status=VL6180x_RangeConfigInterrupt(Device, CONFIG_GPIO_INTERRUPT_DISABLED);
         if((!r_status)&&(!l_status))
         {
            status=AlsSetLowThreshold(low);
@@ -3165,8 +3179,8 @@ int VL6180X::StartMeasurement(OperatingMode operating_mode, void (*fptr)(void), 
            return (r_status|l_status);
             
       case(als_continuous_polling_high_threshold):
-        status=VL6180x_AlsConfigInterrupt(Device, CONFIG_GPIO_INTERRUPT_LEVEL_HIGH);
-        status=VL6180x_RangeConfigInterrupt(Device, CONFIG_GPIO_INTERRUPT_DISABLED);
+        r_status=VL6180x_AlsConfigInterrupt(Device, CONFIG_GPIO_INTERRUPT_LEVEL_HIGH);
+        l_status=VL6180x_RangeConfigInterrupt(Device, CONFIG_GPIO_INTERRUPT_DISABLED);
         if((!r_status)&&(!l_status))
         {
            status=AlsSetHighThreshold(high);
@@ -3179,8 +3193,8 @@ int VL6180X::StartMeasurement(OperatingMode operating_mode, void (*fptr)(void), 
            return (r_status|l_status);
                 
       case(als_continuous_polling_out_of_window):
-        status=VL6180x_AlsConfigInterrupt(Device, CONFIG_GPIO_INTERRUPT_OUT_OF_WINDOW);
-        status=VL6180x_RangeConfigInterrupt(Device, CONFIG_GPIO_INTERRUPT_DISABLED);
+        r_status=VL6180x_AlsConfigInterrupt(Device, CONFIG_GPIO_INTERRUPT_OUT_OF_WINDOW);
+        l_status=VL6180x_RangeConfigInterrupt(Device, CONFIG_GPIO_INTERRUPT_DISABLED);
         if((!r_status)&&(!l_status))
         {
            status=VL6180x_AlsSetThresholds(Device,low,high);
@@ -3332,6 +3346,7 @@ int VL6180X::AlsGetMeasurementIfReady(VL6180xDev_t dev, VL6180x_AlsData_t *pAlsD
 int VL6180X::RangeMeasIntContinuousMode(void (*fptr)(void))
 {
    int status, ClrStatus;
+   (void)fptr;
 
    status=SetupGPIO1(GPIOx_SELECT_GPIO_INTERRUPT_OUTPUT, 1);
    ClrStatus=VL6180x_ClearAllInterrupt(Device);
@@ -3346,6 +3361,7 @@ int VL6180X::RangeMeasIntContinuousMode(void (*fptr)(void))
 int VL6180X::AlsMeasIntContinuousMode(void (*fptr)(void))
 {
    int status, ClrStatus;
+   (void)fptr;
 
    status=SetupGPIO1(GPIOx_SELECT_GPIO_INTERRUPT_OUTPUT, 1);
    ClrStatus=VL6180x_ClearAllInterrupt(Device);
@@ -3401,6 +3417,7 @@ int VL6180X::StartInterleavedMode()
 int VL6180X::InterleavedMode(void (*fptr)(void))
 {
    int status, ClrStatus;
+   (void)fptr;
 
    status=SetupGPIO1(GPIOx_SELECT_GPIO_INTERRUPT_OUTPUT, 1);
    ClrStatus=VL6180x_ClearAllInterrupt(Device);
@@ -3713,7 +3730,6 @@ int VL6180X::GetRangeAlsMeas(MeasureData_t *Data)
  
 int VL6180X::StopMeasurement(OperatingMode operating_mode)
 {
-   int status;
      
    switch(operating_mode)
    {
