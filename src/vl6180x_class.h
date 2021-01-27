@@ -87,21 +87,16 @@ class VL6180X : public RangeSensor, public LightSensor
 {
  public:
     /** Constructor 1
-     * @param[in] &i2c device I2C to be used for communication
-     * @param[in] &pin Mbed DigitalOut pin to be used as component GPIO_0 CE
-     * @param[in] pin_gpio1 pin Mbed InterruptIn PinName to be used as component GPIO_1 INT
-     * @param[in] DevAddr device address, 0x29 by default  
+     * @param[in] i2c device I2C to be used for communication
+     * @param[in] pin Arduino pin to be used as component GPIO_0
      */
-	VL6180X(TwoWire *i2c, int pin, int pin_gpio1, uint8_t DevAddr=VL6180x_DEFAULT_DEVICE_ADDRESS) : RangeSensor(), LightSensor(), dev_i2c(i2c), gpio0(pin), gpio1Int(pin_gpio1) 
+	VL6180X(TwoWire *i2c, int pin) : RangeSensor(), LightSensor(), dev_i2c(i2c), gpio0(pin) 
     {
-       MyDevice.I2cAddr=DevAddr;		 
+       Device=&MyDevice;
+       memset((void *)Device, 0x0, sizeof(struct MyVL6180Dev_t));
+       MyDevice.I2cAddr=VL6180x_DEFAULT_DEVICE_ADDRESS;		 
        MyDevice.Present=0;
        MyDevice.Ready=0;
-       Device=&MyDevice;
-       if(gpio0 >= 0)
-       {
-	     pinMode(gpio0, OUTPUT);
-       }
     }
     
    /** Destructor
@@ -109,6 +104,24 @@ class VL6180X : public RangeSensor, public LightSensor
     virtual ~VL6180X(){}     
     /* warning: VL6180X class inherits from GenericSensor, RangeSensor and LightSensor, that haven`t a destructor.
        The warning should request to introduce a virtual destructor to make sure to delete the object */
+
+    virtual int begin()
+    {
+       if(gpio0 >= 0)
+       {
+          pinMode(gpio0, OUTPUT);
+       }
+       return 0;
+    }
+
+    virtual int end()
+    {
+       if(gpio0 >= 0)
+       {
+          pinMode(gpio0, INPUT);
+       }
+       return 0;
+    }
 
 	/*** Interface Methods ***/	
 	/*** High level API ***/		
@@ -1132,7 +1145,6 @@ class VL6180X : public RangeSensor, public LightSensor
     TwoWire *dev_i2c;
     /* Digital out pin */
 	int gpio0;
-	int gpio1Int;
     /* Device data */
     MyVL6180Dev_t MyDevice;
     VL6180xDev_t Device;  
