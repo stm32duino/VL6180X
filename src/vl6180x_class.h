@@ -93,7 +93,7 @@ class VL6180X : public RangeSensor, public LightSensor
 	VL6180X(TwoWire *i2c, int pin) : RangeSensor(), LightSensor(), dev_i2c(i2c), gpio0(pin) 
     {
        Device=&MyDevice;
-       memset((void *)Device, 0x0, sizeof(struct MyVL6180Dev_t));
+       memset((void *)Device, 0x0, sizeof(struct MyVL6180xDev_t));
        MyDevice.I2cAddr=VL6180x_DEFAULT_DEVICE_ADDRESS;		 
        MyDevice.Present=0;
        MyDevice.Ready=0;
@@ -1146,7 +1146,7 @@ class VL6180X : public RangeSensor, public LightSensor
     /* Digital out pin */
 	int gpio0;
     /* Device data */
-    MyVL6180Dev_t MyDevice;
+    struct MyVL6180xDev_t MyDevice;
     VL6180xDev_t Device;  
 };
 
