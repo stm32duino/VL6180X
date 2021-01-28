@@ -87,7 +87,7 @@ extern volatile uint32_t g_TickCnt;
     #error "VL6180x_SINGLE_DEVICE_DRIVER must be set"
 #endif
 		
-struct MyVL6180Dev_t {
+struct MyVL6180xDev_t {
     struct VL6180xDevData_t Data;
     uint8_t I2cAddr;
     //uint8_t DevID;
@@ -96,7 +96,7 @@ struct MyVL6180Dev_t {
     unsigned Present:1;
     unsigned Ready:1;
 };
-typedef struct MyVL6180Dev_t *VL6180xDev_t;
+typedef struct MyVL6180xDev_t *VL6180xDev_t;
 
 #define VL6180xDevDataGet(dev, field) (dev->Data.field)
 #define VL6180xDevDataSet(dev, field, data) (dev->Data.field)=(data)
